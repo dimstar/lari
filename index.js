@@ -3,8 +3,9 @@ require("dotenv").config();
 
 // add our dependencies for doing api things
 let Twitter = require('twitter');
-let Request = require('request');
 let Spotify = require('node-spotify-api');
+let request = require('request');
+
 // gimme the keys giant dad. I got a date with susie
 let keys = require('./keys.js');
 // console.log(keys);
@@ -40,7 +41,7 @@ const argumentor = {
                     //
                     // console.log(tweet);
                     console.log(tweet.text);
-                    console.log('...Was tweeted@' + tweet.created_at);
+                    console.log('...was tweeted@' + tweet.created_at);
                 }
             }
             
@@ -54,9 +55,68 @@ const argumentor = {
             if (err) {
               return console.log('Error occurred: ' + err);
             }
-           
-          console.log(data.tracks.items); 
+          // dump items from spotify 
+        //   console.log(data.tracks.items); 
+
+          // set the items into a var for easy iteration
+          const spotify_items = data.tracks.items;
+
+          for (const spotKey in spotify_items) {
+              if (spotify_items.hasOwnProperty(spotKey)) {
+                  const spotify_song = spotify_items[spotKey];
+
+                  console.log('Song Name: ' + spotify_song.name);
+                  console.log('Song by:');
+                  if(spotify_song.artists instanceof Array){
+                    spotify_song.artists.map(mapOutArtist);
+                  }
+                  console.log('Preview Url: ' + spotify_song.preview_url);
+                  console.log('Album: ' + spotify_song.album.name);
+              }
+          }
+
         });
+    },
+    'movie-this': (movName, movYear)=>{
+        var omdbParams = {
+            t: movName,
+            y: movYear,
+            apikey: '35613785'
+        }
+        
+        var apiUrl = 'http://www.omdbapi.com/?';
+        
+        for (const key in omdbParams) {
+            if (omdbParams.hasOwnProperty(key)) {
+                apiUrl += `${key}=` + omdbParams[key] + '&'; 
+            }
+        }
+        
+        request(apiUrl, function( error, response, body){
+            // console.log("error:", error);
+            
+            var results = JSON.parse(body);
+
+            // console.log(results);
+            let rotRating = '';
+            if(results.Ratings instanceof Array){
+                rotRating = results.Ratings.map(getRottenRating);
+            }
+            
+            console.log(`${results.Title} came out ${results.Released}, and was made in ${results.Country}.
+Its available in these language(s): ${results.Language}.\n${rotRating}\nPlot: ${results.Plot}\nStaring ${results.Actors}`);
+        
+        })
+    }
+}
+
+const mapOutArtist = (artistObj) => {
+    console.log( 'Artist: ' + artistObj.name);
+}
+
+const getRottenRating = (ratings) => {
+    if(ratings['Source']){
+        return `${ratings['Source']} gave it a ${ratings['Value']} `;
     }
 }
 
