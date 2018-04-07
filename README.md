@@ -10,3 +10,6 @@ node lari.js spotify-this-song ['song name']
 node lari.js do-what-it-says
 ```
 and so much more! actually there isn't more, thats it. ONLY use commands above where you see [stuff] you can swap about 'stuff' to be whatever you like! Actually it has to be either a song or movie.
+
+## Thanks!
+Thanks for giving lari a chance.
