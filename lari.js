@@ -2,16 +2,17 @@
 require("dotenv").config();
 
 // add our dependencies for doing api things
-let Twitter = require('twitter');
-let Spotify = require('node-spotify-api');
-let request = require('request');
+const Twitter = require('twitter');
+const Spotify = require('node-spotify-api');
+const request = require('request');
+const fs = require('fs');
 
 // gimme the keys giant dad. I got a date with susie
 let keys = require('./keys.js');
 // console.log(keys);
 
 // lets get argumentative
-let [node, script, command, input] = process.argv;
+let [node, script, command, input, input1] = process.argv;
 // console.log(command);
 
 // The argumentor, this takes commands and passes it down to
@@ -47,7 +48,11 @@ const argumentor = {
             
         });
     },
-    'spotify-this-song': (song_name)=>{
+    'spotify-this-song': (song_name = false)=>{
+        if(!song_name){
+            song_name = 'The Sign';
+        }
+
         // create new spotify client
         let spotify = new Spotify(keys.spotify);
 
@@ -66,7 +71,7 @@ const argumentor = {
                   const spotify_song = spotify_items[spotKey];
 
                   console.log('Song Name: ' + spotify_song.name);
-                  console.log('Song by:');
+                  console.log('Song by...');
                   if(spotify_song.artists instanceof Array){
                     spotify_song.artists.map(mapOutArtist);
                   }
@@ -78,6 +83,7 @@ const argumentor = {
         });
     },
     'movie-this': (movName, movYear)=>{
+        
         var omdbParams = {
             t: movName,
             y: movYear,
@@ -107,11 +113,22 @@ const argumentor = {
 Its available in these language(s): ${results.Language}.\n${rotRating}\nPlot: ${results.Plot}\nStaring ${results.Actors}`);
         
         })
+    },
+    'do-what-it-says': ()=>{
+        // read in a file
+        fs.readFile('./random.txt', 'utf8', (err, file_data) => {
+            if (err) throw err;
+            // console.log(file_data);
+            let fileInputs = file_data.split(',');
+            
+            argumentor.handler( fileInputs[0], fileInputs[1]);
+          });
+        
     }
 }
 
 const mapOutArtist = (artistObj) => {
-    console.log( 'Artist: ' + artistObj.name);
+    console.log( '\tArtist: ' + artistObj.name);
 }
 
 const getRottenRating = (ratings) => {
@@ -120,5 +137,10 @@ const getRottenRating = (ratings) => {
     }
 }
 
+const logIt = (logMssg) => {
+    console.log(logMssg);
+    // then write to a file
+}
+
 // handle the argument
-argumentor.handler( command, input);
+argumentor.handler( command, input, input1);
